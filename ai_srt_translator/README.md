@@ -2,7 +2,8 @@
 <a name="top"></a>
 <div align="center">
   <h1>🤖 AI SRT Translator</h1>
-  <p>Automated subtitle translation and time shifting using Deepseek AI</p>
+  <p>Automated .srt subtitle translation and time shifting using Deepseek AI</p>
+  <p> Простой универсальный скрипт для пакетного ИИ перевода и синхронизации времени .srt субтитров</p>
 </div>
 
 ## 🔍 Table of Contents
@@ -38,7 +39,9 @@
 
 ### All Platforms
 1. Install required library:
-   $ pip install requests
+   
+   Windows: `pip install requests`  
+   Linux/macOS: `$ pip install requests`   
 
 2. Download script:  
    [sub.py](https://github.com/DuckWTF/DS/raw/master/ai_srt_translator/sub.py)  
