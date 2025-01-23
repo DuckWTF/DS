@@ -72,7 +72,7 @@ def configure_settings(settings: Dict):
                     print("Некорректный формат числа. Используйте формат 123.45")
         
         elif choice == '2':
-            lang = input("Введите язык для перевода (например 'русский', 'английский' или 'none'): ").strip()
+            lang = input("Введите язык для перевода (например 'русский', 'английский' или 'none', если перевод не нужен): ").strip()
             settings['target_language'] = lang
             write_settings(settings)
             print("Язык перевода обновлен")
