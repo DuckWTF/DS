@@ -55,19 +55,14 @@
 ## 🚀 Usage
 1. Place SRT files in the script folder
 2. Open terminal in folder:  
-   Windows:  
-   > Press Win + R → type `cmd` → Enter  
-   > cd C:\ai_translator  
+   Windows > Press Win + R → type `cmd` → Enter: `cd C:\ai_translator`  
    
-   Linux/macOS:  
-   $ cd ~/ai_translator
+   Linux/macOS:  `$ cd ~/ai_translator`
 
 3. Run script:  
-   Windows:  
-   > python sub.py  
+   Windows:  `python sub.py`  
    
-   Linux/macOS:  
-   $ python sub.py
+   Linux/macOS:  `$ python sub.py`
 
 4. Processed files saved in /output
 
@@ -95,15 +90,24 @@
 <a name="установка"></a>
 ## 📦 Установка
 
-### Для всех ОС
-1. Установите библиотеку:  
-   $ pip install requests
+1. Установите (если еще не установлен) **python 3.7+** 
+   
+   Windows: в терминале (WIN + R → cmd.exe) `winget install Python.Python.3`
+   
+   Linux/macOS:  `sudo apt update`
+                 `sudo apt install python3`
 
-2. Скачайте скрипт:  
+3. Установите (если еще не установлена) библиотеку **requests**:  
+   
+   Windows:   `pip install requests`
+   
+   Linux/macOS:  `$ pip install requests`
+
+4. Скачайте скрипт:  
    [sub_ru.py](https://github.com/DuckWTF/DS/raw/master/ai_srt_translator/sub_ru.py)  
-   *откройте ссылку → ПКМ → Сохранить как)*
+   *ПКМ → "Сохранить ссылку как" (Chrome) / "Загрузить связанный файл" (Safari)*
 
-3. Сохраните файл в пустую папку, например  
+5. Сохраните файл в пустую папку, например  
    `C:\ai_translator`  
 
 <a name="использование"></a>
@@ -111,29 +115,27 @@
 1. Поместите SRT-файлы в папку со скриптом
   
 2. Откройте папку в терминале:  
-   Windows:  
-   > cd C:\ai_translator  
+   Windows:  `cd C:\ai_translator`  
    
-   Linux/macOS:  
-   $ cd ~/ai_translator
+   Linux/macOS:  `$ cd ~/ai_translator`
 
 3. Запустите скрипт:
-   Windows:  
-   python sub_ru.py  
+   Windows:  `python sub_ru.py`  
    
-   Linux/macOS:  
-   $ python sub_ru.py
+   Linux/macOS:  `$ python sub_ru.py`
    
 4. Для настройки синхронизации таймингов и выбора языка (по умолчанию- русский) нажмите 1. Для запуска с текущими настройками нажмите Enter
-  
-5. Результаты в папке /output
+
+5. По запросу скрипта введите API ключ deepseek
+   
+6. Результаты в папке /output
 
 <a name="api-key"></a>
 ## 🔑 Получение API Ключа
 1. Зарегистрируйтесь на [Deepseek](https://platform.deepseek.com/signup)
 2. Привяжите платежный метод
 3. Создайте ключ в разделе API
-4. Скопируйте ключ формата sk-
+4. Скопируйте ключ формата sk-1abcd234de56fg7hij8klmnopq9rstu0
 
 ---
 
