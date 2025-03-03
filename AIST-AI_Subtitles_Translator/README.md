@@ -36,7 +36,7 @@
 ## ⚙️ System Requirements
 - Python 3.7+ (PATH configured)
 - Active Deepseek API key or Gemini API key
-- `requests` library for Python (installed automatically with script or manually via pip)
+- `requests` library for Python (for deepseek)
 
 <a name="installation"></a>
 ## 📦 Installation
@@ -132,7 +132,7 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
 ## ⚙️ Требования
 - Python 3.7+ (в системном PATH)
 - API ключ Deepseek или Gemini
-- Библиотека `requests` для Python (устанавливается автоматически со скриптом или вручную через pip)
+- Библиотека `requests` для Python (для использование deepseek)
 
 <a name="установка"></a>
 ## 📦 Установка
