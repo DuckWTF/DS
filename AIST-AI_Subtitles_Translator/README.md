@@ -52,16 +52,16 @@
    *Right Click → "Save Link As" (Chrome) / "Download Linked File" (Safari)*
 
 3. Extract to empty folder:
-   Windows: `C:\ai_translator`
-   Linux/macOS: `~/ai_translator`
+   Windows: `C:\AIST-AI_Subtitles_Translator`
+   Linux/macOS: `~/AIST-AI_Subtitles_Translator`
 
 <a name="usage"></a>
 ## 🚀 Usage
 1. Place SRT or ASS files in the script folder
 2. Open terminal in folder:
-   Windows > Press Win + R → type `cmd` → Enter: `cd C:\ai_translator`
+   Windows > Press Win + R → type `cmd` → Enter: `cd C:\AIST-AI_Subtitles_Translator`
 
-   Linux/macOS:  `$ cd ~/ai_translator`
+   Linux/macOS:  `$ cd ~/AIST-AI_Subtitles_Translator`
 
 3. Run script:
    Windows:  `python sub.py`
@@ -155,16 +155,16 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
    *ПКМ → "Сохранить ссылку как" (Chrome) / "Загрузить связанный файл" (Safari)*
 
 4. Сохраните файл в пустую папку, например
-   `C:\ai_translator`
+   `C:\AIST-AI_Subtitles_Translator`
 
 <a name="использование"></a>
 ## 🚀 Использование
 1. Поместите SRT или ASS файлы в папку со скриптом
 
 2. Откройте папку в терминале:
-   Windows:  `cd C:\ai_translator`
+   Windows:  `cd C:\AIST-AI_Subtitles_Translator`
 
-   Linux/macOS:  `$ cd ~/ai_translator`
+   Linux/macOS:  `$ cd ~/AIST-AI_Subtitles_Translator`
 
 3. Запустите скрипт:
    Windows:  `python sub_ru.py`
