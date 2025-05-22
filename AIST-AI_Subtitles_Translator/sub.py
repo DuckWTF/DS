@@ -45,6 +45,7 @@ def create_default_settings():
         f.write('chunk_size=0\n')
         f.write('max_retries=10\n')
         f.write('timeout=360\n')  
+        f.write('log_level=errors\n')
 
 def read_settings() -> Dict:
     settings = {
@@ -57,7 +58,8 @@ def read_settings() -> Dict:
         'deepseek_model': 'deepseek-chat',  
         'chunk_size': 0,
         'max_retries': 10,
-        'timeout': 360  
+        'timeout': 360,
+        'log_level': 'errors'  
     }
     if not os.path.exists(SETTINGS_FILE):
         create_default_settings()
@@ -80,6 +82,8 @@ def read_settings() -> Dict:
     # Ensure that api_provider is in settings, even if it was not in the file
     if 'api_provider' not in settings:
         settings['api_provider'] = 'deepseek'
+    if 'log_level' not in settings: # Ensure log_level is in settings
+        settings['log_level'] = 'errors'
     return settings
 
 def write_settings(settings: Dict):
@@ -94,6 +98,7 @@ def write_settings(settings: Dict):
         f.write(f"chunk_size={settings['chunk_size']}\n")
         f.write(f"max_retries={settings['max_retries']}\n")
         f.write(f"timeout={settings['timeout']}\n") 
+        f.write(f"log_level={settings.get('log_level', 'errors')}\n")
 
 def configure_settings(settings: Dict):
     while True:
@@ -137,6 +142,10 @@ def configure_settings(settings: Dict):
 
         print(f"{next_option}. Timeout (current: {settings['timeout']} s)")
         option_number_timeout = next_option
+        next_option += 1
+
+        print(f"{next_option}. Log level (current: {settings.get('log_level', 'errors')})")
+        option_number_log_level = next_option
         next_option += 1
 
         print(f"{next_option}. Start processing")
@@ -323,7 +332,64 @@ def configure_settings(settings: Dict):
             elif numeric_choice == option_number_start:
                 break
 
+            # Log level
+            elif numeric_choice == option_number_log_level:
+                while True:
+                    print("   Choose log level:")
+                    print("   1 - None (no logging)")
+                    print("   2 - Errors Only")
+                    print("   3 - API Calls (errors and API req/resp)")
+                    print("   4 - Debug (detailed script debugging)")
+                    level_choice = input("Select log level: ").strip()
+                    if level_choice == '1':
+                        settings['log_level'] = 'none'
+                        break
+                    elif level_choice == '2':
+                        settings['log_level'] = 'errors'
+                        break
+                    elif level_choice == '3':
+                        settings['log_level'] = 'api_calls'
+                        break
+                    elif level_choice == '4':
+                        settings['log_level'] = 'debug'
+                        break
+                    else:
+                        print("Invalid choice. Enter a number from 1 to 4.")
+                write_settings(settings)
+                # Reconfigure logging after changing the level
+                setup_logging(settings.get('log_level', 'errors'))
+                print(f"Log level set to '{settings['log_level']}'")
+                continue
+
+
         print("Invalid choice")
+
+def setup_logging(log_level_str: str):
+    # Clear existing handlers from the root logger
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+
+    level = logging.INFO # Default for api_calls
+    if log_level_str == 'none':
+        level = logging.CRITICAL + 1 
+    elif log_level_str == 'errors':
+        level = logging.ERROR
+    elif log_level_str == 'debug':
+        level = logging.DEBUG
+    
+    logging.basicConfig(
+        level=level,
+        format='%(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('subtitles_translation.log'),
+            logging.StreamHandler()
+        ]
+    )
+    # Update the global logger's level as well, if it was already obtained
+    global logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(level)
+
 
 def get_api_key(settings: Dict) -> Optional[str]:
     api_provider = settings['api_provider']
@@ -734,15 +800,25 @@ def translate_text_deepseek(text: str, settings: Dict) -> Optional[str]:
 
     try:
         timeout_value = int(settings.get('timeout', 360))
+        
+        log_level = settings.get('log_level', 'errors')
+        if log_level in ['api_calls', 'debug']:
+            logger.info(f"API Request to {DEEPSEEK_API_URL}: Method=POST, Body={json.dumps(data)}")
+
         response = requests.post(
             DEEPSEEK_API_URL,
             headers=headers,
             data=json.dumps(data),
             timeout=timeout_value
         )
+        
+        if log_level in ['api_calls', 'debug']:
+            logger.info(f"API Response from {DEEPSEEK_API_URL}: Status={response.status_code}, Body={response.text}")
+
         response.raise_for_status()
         response_json = response.json()
 
+        # This debug log will only show if log_level is 'debug' due to logger's own level setting
         logger.debug(f"DeepSeek API Response (JSON):\n{json.dumps(response_json, indent=2, ensure_ascii=False)}")
 
         if 'choices' in response_json and response_json['choices']:
@@ -758,6 +834,8 @@ def translate_text_deepseek(text: str, settings: Dict) -> Optional[str]:
 
     except requests.exceptions.RequestException as e:
         logger.error(f"DeepSeek API Request Error: {e}")
+        if hasattr(e, 'response') and e.response is not None and settings.get('log_level', 'errors') in ['api_calls', 'debug']:
+             logger.info(f"Failed API Response from {DEEPSEEK_API_URL}: Status={e.response.status_code}, Body={e.response.text}")
         return None
     except Exception as e:
         logger.error(f"DeepSeek API Error: {str(e)}")
@@ -816,17 +894,28 @@ def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
     }
 
     try:
-        timeout_value = int(settings.get('timeout', 360)) 
+        timeout_value = int(settings.get('timeout', 360))
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings['gemini_model']}:generateContent"
+        
+        log_level = settings.get('log_level', 'errors')
+        if log_level in ['api_calls', 'debug']:
+            logger.info(f"API Request to {gemini_url}: Method=POST, Body={json.dumps(data)}")
+
         response = requests.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{settings['gemini_model']}:generateContent",
+            gemini_url,
             headers=headers,
             params=params,
             data=json.dumps(data),
             timeout=timeout_value
         )
+
+        if log_level in ['api_calls', 'debug']:
+            logger.info(f"API Response from {gemini_url}: Status={response.status_code}, Body={response.text}")
+            
         response.raise_for_status()
         response_json = response.json()
 
+        # This debug log will only show if log_level is 'debug'
         logger.debug(f"Gemini API Response (JSON):\n{json.dumps(response_json, indent=2, ensure_ascii=False)}")
 
         if 'candidates' in response_json and response_json['candidates']:
@@ -850,9 +939,13 @@ def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
 
     except requests.exceptions.HTTPError as e:
         logger.error(f"Gemini API HTTP Error: {e}")
+        # Log response body for HTTP errors if log level is api_calls or debug
+        if e.response is not None and settings.get('log_level', 'errors') in ['api_calls', 'debug']:
+            logger.info(f"Failed API Response from {gemini_url}: Status={e.response.status_code}, Body={e.response.text}")
+        # The original error logging for status and body will be covered by logger.error if level is ERROR or lower
         if e.response is not None:
-            logger.error(f"Response status code: {e.response.status_code}")
-            logger.error(f"Response body: {e.response.text}")
+             logger.error(f"Response status code: {e.response.status_code}") # This will show if log level is ERROR or lower
+             logger.error(f"Response body: {e.response.text}") # This will show if log level is ERROR or lower
         return None
 
     except Exception as e:
@@ -1339,4 +1432,8 @@ def main():
 
 
 if __name__ == "__main__":
+    # Initial logging setup based on settings
+    settings = read_settings()
+    setup_logging(settings.get('log_level', 'errors')) # Setup logging before anything else
+
     main()

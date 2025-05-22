@@ -32,7 +32,7 @@
 - Configurable translation settings
 - All languages are supported
 
-**Note on Gemma Models:** Gemma models, such as `gemma-3n-e4b-it` and `gemma-3-27b-it`, are accessible via the Google API and are primarily optimized for English, though they possess multimodal capabilities. While they can be prompted for translation, their performance may vary for non-English languages compared to models specifically trained on a wider range of languages. The script sends all necessary instructions within the user prompt, compatible with models that do not support separate system prompts.
+**Note on Gemma Models:** Gemma models offered via the Google API (selectable under the Gemini provider) are generally free and lightweight. For highly complex tasks or nuanced translation into non-English languages, their performance may differ compared to larger, premium models like some Gemini variants. Users are encouraged to test with their specific needs.
 
 <a name="requirements"></a>
 ## ⚙️ System Requirements
@@ -119,6 +119,11 @@ You can configure the script settings by running it and pressing `1` when prompt
 7.  **Chunk size**: Set the maximum chunk size in characters for processing text in parts, can be useful for VERY long files. `0` (default) disables chunking and processes the entire subtitle file at once.
 8.  **Retries**: Set the number of retry attempts for translation in case of errors.
 9.  **Timeout**: Set the timeout in seconds for API requests.
+10. **Log level**: Configure the verbosity of logs. Options:
+    - `None`: No logging.
+    - `Errors Only`: Only script errors will be logged.
+    - `API Calls`: Logs errors and basic information about API requests and responses (URL, method, request/response bodies).
+    - `Debug`: Logs API calls and more detailed debugging information about script execution. (Default: Errors Only)
 
 Settings are saved in `settings.txt` file in the script folder and will be loaded on the next run.
 
@@ -132,7 +137,7 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
 - Настраиваемые параметры перевода 
 - Поддержка всех языков, включая клингон и эльфийский
 
-**Примечание о моделях Gemma:** Модели Gemma, такие как `gemma-3n-e4b-it` и `gemma-3-27b-it`, доступны через Google API и в первую очередь оптимизированы для английского языка, обладая при этом мультимодальными возможностями. Хотя их можно использовать для перевода с помощью специальных инструкций в промпте, их производительность для других языков может отличаться от моделей, изначально обученных на многих языках. Скрипт передает все необходимые инструкции в составе пользовательского промпта, что совместимо с моделями, не поддерживающими отдельный системный промпт.
+**Примечание о моделях Gemma:** Модели Gemma, предлагаемые через Google API (выбираются в списке провайдера Gemini), как правило, являются бесплатными и легковесными. Для очень сложных задач или качественного перевода на языки, отличные от английского, их производительность может отличаться от более крупных премиум-моделей, таких как некоторые варианты Gemini. Рекомендуется протестировать их для ваших конкретных задач.
 
 <a name="требования"></a>
 ## ⚙️ Требования
@@ -226,6 +231,11 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
 7.  **Размер блока**: Установка максимального размера блока в символах для обработки текста частями. Может понадобиться при ОЧЕНЬ длинных файлах субтитров. `0` (по умолчанию) отключает разделение на блоки и обрабатывает весь файл субтитров целиком.
 8.  **Повторные попытки**: Установка количества повторных попыток перевода в случае ошибок.
 9.  **Таймаут**: Установка таймаута в секундах для запросов к API.
+10. **Уровень логирования**: Настройка детализации логов. Опции:
+    - `None` (Ничего): Логирование отключено.
+    - `Errors Only` (Только ошибки): Логируются только ошибки выполнения скрипта.
+    - `API Calls` (Вызовы API): Логируются ошибки и основная информация о запросах к API и ответах от него (URL, метод, тела запросов/ответов).
+    - `Debug` (Отладка): Логируются вызовы API и более подробная отладочная информация о работе скрипта. (По умолчанию: Только ошибки)
 
 Настройки сохраняются в файле `settings.txt` в папке со скриптом и загружаются при следующем запуске.
 

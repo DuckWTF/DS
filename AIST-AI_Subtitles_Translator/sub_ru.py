@@ -44,7 +44,8 @@ def create_default_settings():
         f.write('deepseek_model=deepseek-chat\n')  
         f.write('chunk_size=0\n')
         f.write('max_retries=10\n')
-        f.write('timeout=360\n')  
+        f.write('timeout=360\n')
+        f.write('log_level=errors\n')  
 
 def read_settings() -> Dict:
     settings = {
@@ -57,7 +58,8 @@ def read_settings() -> Dict:
         'deepseek_model': 'deepseek-chat',  
         'chunk_size': 0,
         'max_retries': 10,
-        'timeout': 360  # <-- Значение по умолчанию
+        'timeout': 360,  # <-- Значение по умолчанию
+        'log_level': 'errors'
     }
     if not os.path.exists(SETTINGS_FILE):
         create_default_settings()
@@ -80,6 +82,8 @@ def read_settings() -> Dict:
     # Гарантируем, что api_provider есть в settings, даже если не было в файле
     if 'api_provider' not in settings:
         settings['api_provider'] = 'deepseek'
+    if 'log_level' not in settings: # Гарантируем, что log_level есть в settings
+        settings['log_level'] = 'errors'
     return settings
 
 def write_settings(settings: Dict):
@@ -94,6 +98,7 @@ def write_settings(settings: Dict):
         f.write(f"chunk_size={settings['chunk_size']}\n")
         f.write(f"max_retries={settings['max_retries']}\n")
         f.write(f"timeout={settings['timeout']}\n")  # <-- Запись таймаута
+        f.write(f"log_level={settings.get('log_level', 'errors')}\n")
 
 def configure_settings(settings: Dict):
     while True:
@@ -137,6 +142,10 @@ def configure_settings(settings: Dict):
 
         print(f"{next_option}. Таймаут (текущий: {settings['timeout']} c)")
         option_number_timeout = next_option
+        next_option += 1
+        
+        print(f"{next_option}. Уровень логирования (текущий: {settings.get('log_level', 'errors')})")
+        option_number_log_level = next_option
         next_option += 1
 
         print(f"{next_option}. Начать обработку")
@@ -323,7 +332,62 @@ def configure_settings(settings: Dict):
             elif numeric_choice == option_number_start:
                 break
 
+            # Уровень логирования
+            elif numeric_choice == option_number_log_level:
+                while True:
+                    print("   Выберите уровень логирования:")
+                    print("   1 - Ничего (логирование отключено)")
+                    print("   2 - Только ошибки")
+                    print("   3 - Вызовы API (ошибки и запросы/ответы API)")
+                    print("   4 - Отладка (детальная отладка скрипта)")
+                    level_choice = input("Выберите уровень: ").strip()
+                    if level_choice == '1':
+                        settings['log_level'] = 'none'
+                        break
+                    elif level_choice == '2':
+                        settings['log_level'] = 'errors'
+                        break
+                    elif level_choice == '3':
+                        settings['log_level'] = 'api_calls'
+                        break
+                    elif level_choice == '4':
+                        settings['log_level'] = 'debug'
+                        break
+                    else:
+                        print("Неверный выбор. Введите число от 1 до 4.")
+                write_settings(settings)
+                # Перенастроить логирование после изменения уровня
+                setup_logging(settings.get('log_level', 'errors'))
+                print(f"Уровень логирования изменен на '{settings['log_level']}'")
+                continue
+
         print("Неверный выбор")
+
+def setup_logging(log_level_str: str):
+    # Очищаем существующие обработчики из корневого логгера
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+
+    level = logging.INFO # По умолчанию для api_calls
+    if log_level_str == 'none':
+        level = logging.CRITICAL + 1 
+    elif log_level_str == 'errors':
+        level = logging.ERROR
+    elif log_level_str == 'debug':
+        level = logging.DEBUG
+    
+    logging.basicConfig(
+        level=level,
+        format='%(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('subtitles_translation.log', encoding='utf-8'), # Добавлена кодировка
+            logging.StreamHandler()
+        ]
+    )
+    # Обновляем уровень глобального логгера, если он уже был получен
+    global logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(level)
 
 def get_api_key(settings: Dict) -> Optional[str]:
     api_provider = settings['api_provider']
@@ -734,12 +798,21 @@ def translate_text_deepseek(text: str, settings: Dict) -> Optional[str]:
 
     try:
         timeout_value = int(settings.get('timeout', 360))
+        
+        log_level = settings.get('log_level', 'errors')
+        if log_level in ['api_calls', 'debug']:
+            logger.info(f"Запрос к API {DEEPSEEK_API_URL}: Метод=POST, Тело={json.dumps(data, ensure_ascii=False)}")
+
         response = requests.post(
             DEEPSEEK_API_URL,
             headers=headers,
             data=json.dumps(data),
             timeout=timeout_value
         )
+
+        if log_level in ['api_calls', 'debug']:
+            logger.info(f"Ответ от API {DEEPSEEK_API_URL}: Статус={response.status_code}, Тело={response.text}")
+            
         response.raise_for_status()
         response_json = response.json()
 
@@ -757,11 +830,13 @@ def translate_text_deepseek(text: str, settings: Dict) -> Optional[str]:
             return None
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"DeepSeek API Request Error: {e}")
+        logger.error(f"Ошибка запроса к DeepSeek API: {e}")
+        if hasattr(e, 'response') and e.response is not None and settings.get('log_level', 'errors') in ['api_calls', 'debug']:
+             logger.info(f"Неудачный ответ от API {DEEPSEEK_API_URL}: Статус={e.response.status_code}, Тело={e.response.text}")
         return None
     except Exception as e:
-        logger.error(f"DeepSeek API Error: {str(e)}")
-        logger.exception("DeepSeek API Exception details:")
+        logger.error(f"Ошибка DeepSeek API: {str(e)}")
+        logger.exception("Детали исключения DeepSeek API:")
         return None
 
 def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
@@ -817,13 +892,23 @@ def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
 
     try:
         timeout_value = int(settings.get('timeout', 360))  # <-- Используем таймаут из настроек
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings['gemini_model']}:generateContent"
+
+        log_level = settings.get('log_level', 'errors')
+        if log_level in ['api_calls', 'debug']:
+            logger.info(f"Запрос к API {gemini_url}: Метод=POST, Тело={json.dumps(data, ensure_ascii=False)}")
+
         response = requests.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{settings['gemini_model']}:generateContent",
+            gemini_url,
             headers=headers,
             params=params,
             data=json.dumps(data),
             timeout=timeout_value
         )
+
+        if log_level in ['api_calls', 'debug']:
+            logger.info(f"Ответ от API {gemini_url}: Статус={response.status_code}, Тело={response.text}")
+
         response.raise_for_status()
         response_json = response.json()
 
@@ -849,15 +934,17 @@ def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
         raise Exception("Неожиданная структура ответа Gemini API")
 
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Gemini API HTTP Error: {e}")
-        if e.response is not None:
-            logger.error(f"Response status code: {e.response.status_code}")
-            logger.error(f"Response body: {e.response.text}")
+        logger.error(f"Ошибка Gemini API HTTP: {e}")
+        if e.response is not None and settings.get('log_level', 'errors') in ['api_calls', 'debug']:
+            logger.info(f"Неудачный ответ от API {gemini_url}: Статус={e.response.status_code}, Тело={e.response.text}")
+        if e.response is not None: # Эти логи будут видны если уровень ERROR или ниже
+            logger.error(f"Код статуса ответа: {e.response.status_code}")
+            logger.error(f"Тело ответа: {e.response.text}")
         return None
 
     except Exception as e:
-        logger.error(f"Gemini API Error: {str(e)}")
-        logger.exception("Gemini API Exception details:")
+        logger.error(f"Ошибка Gemini API: {str(e)}")
+        logger.exception("Детали исключения Gemini API:")
         return None
 
 
@@ -1339,4 +1426,8 @@ def main():
 
 
 if __name__ == "__main__":
+    # Начальная настройка логирования на основе настроек
+    settings = read_settings()
+    setup_logging(settings.get('log_level', 'errors')) # Настраиваем логирование до всего остального
+
     main()
