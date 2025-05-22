@@ -811,10 +811,15 @@ def translate_text_deepseek(text: str, settings: Dict) -> Optional[str]:
         )
 
         if log_level in ['api_calls', 'debug']:
-            logger.info(f"Ответ от API {DEEPSEEK_API_URL}: Статус={response.status_code}, Тело={response.text}")
+            try:
+                response_json_data = response.json()
+                response_data_log = json.dumps(response_json_data, indent=2, ensure_ascii=False)
+            except ValueError: # или json.JSONDecodeError
+                response_data_log = response.text
+            logger.info(f"Ответ от API {DEEPSEEK_API_URL}: Статус={response.status_code}, Тело ответа:\n{response_data_log}")
             
         response.raise_for_status()
-        response_json = response.json()
+        response_json = response.json() # Предполагаем, что это выполнится, если raise_for_status не вызвало исключение
 
         logger.debug(f"DeepSeek API Response (JSON):\n{json.dumps(response_json, indent=2, ensure_ascii=False)}")
 
@@ -829,10 +834,16 @@ def translate_text_deepseek(text: str, settings: Dict) -> Optional[str]:
             logger.error(f"DeepSeek API: Unexpected response structure: {response_json}")
             return None
 
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException as e: # Включает HTTPError
         logger.error(f"Ошибка запроса к DeepSeek API: {e}")
-        if hasattr(e, 'response') and e.response is not None and settings.get('log_level', 'errors') in ['api_calls', 'debug']:
-             logger.info(f"Неудачный ответ от API {DEEPSEEK_API_URL}: Статус={e.response.status_code}, Тело={e.response.text}")
+        if hasattr(e, 'response') and e.response is not None:
+            if settings.get('log_level', 'errors') in ['api_calls', 'debug']:
+                try:
+                    error_response_json = e.response.json()
+                    error_response_data_log = json.dumps(error_response_json, indent=2, ensure_ascii=False)
+                except ValueError: # или json.JSONDecodeError
+                    error_response_data_log = e.response.text
+                logger.info(f"Неудачный ответ от API {DEEPSEEK_API_URL}: Статус={e.response.status_code}, Тело ответа:\n{error_response_data_log}")
         return None
     except Exception as e:
         logger.error(f"Ошибка DeepSeek API: {str(e)}")
@@ -907,10 +918,15 @@ def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
         )
 
         if log_level in ['api_calls', 'debug']:
-            logger.info(f"Ответ от API {gemini_url}: Статус={response.status_code}, Тело={response.text}")
+            try:
+                response_json_data = response.json()
+                response_data_log = json.dumps(response_json_data, indent=2, ensure_ascii=False)
+            except ValueError: # или json.JSONDecodeError
+                response_data_log = response.text
+            logger.info(f"Ответ от API {gemini_url.split('?')[0]}: Статус={response.status_code}, Тело ответа:\n{response_data_log}")
 
         response.raise_for_status()
-        response_json = response.json()
+        response_json = response.json() # Предполагаем, что это выполнится, если raise_for_status не вызвало исключение
 
         logger.debug(f"Gemini API Response (JSON):\n{json.dumps(response_json, indent=2, ensure_ascii=False)}")
 
@@ -933,11 +949,19 @@ def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
         logger.error(f"Gemini API response structure error: {response_json}")
         raise Exception("Неожиданная структура ответа Gemini API")
 
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPError as e: # HTTPError является подклассом RequestException
         logger.error(f"Ошибка Gemini API HTTP: {e}")
-        if e.response is not None and settings.get('log_level', 'errors') in ['api_calls', 'debug']:
-            logger.info(f"Неудачный ответ от API {gemini_url}: Статус={e.response.status_code}, Тело={e.response.text}")
-        if e.response is not None: # Эти логи будут видны если уровень ERROR или ниже
+        if e.response is not None:
+            if settings.get('log_level', 'errors') in ['api_calls', 'debug']:
+                try:
+                    error_response_json = e.response.json()
+                    error_response_data_log = json.dumps(error_response_json, indent=2, ensure_ascii=False)
+                except ValueError: # или json.JSONDecodeError
+                    error_response_data_log = e.response.text
+                logger.info(f"Неудачный ответ от API {gemini_url.split('?')[0]}: Статус={e.response.status_code}, Тело ответа:\n{error_response_data_log}")
+            # Эти конкретные logger.error для статуса/тела могут стать избыточными, если logger.info выше хорошо их охватывает,
+            # но их сохранение гарантирует, что ошибки будут залогированы, даже если уровень не 'api_calls'.
+            # Общее исключение e уже будет залогировано logger.error.
             logger.error(f"Код статуса ответа: {e.response.status_code}")
             logger.error(f"Тело ответа: {e.response.text}")
         return None

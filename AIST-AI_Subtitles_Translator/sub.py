@@ -813,10 +813,15 @@ def translate_text_deepseek(text: str, settings: Dict) -> Optional[str]:
         )
         
         if log_level in ['api_calls', 'debug']:
-            logger.info(f"API Response from {DEEPSEEK_API_URL}: Status={response.status_code}, Body={response.text}")
+            try:
+                response_json_data = response.json()
+                response_data_log = json.dumps(response_json_data, indent=2, ensure_ascii=False)
+            except ValueError:
+                response_data_log = response.text
+            logger.info(f"API Response from {DEEPSEEK_API_URL}: Status={response.status_code}, Body:\n{response_data_log}")
 
         response.raise_for_status()
-        response_json = response.json()
+        response_json = response.json() # Assuming this will succeed if raise_for_status didn't throw
 
         # This debug log will only show if log_level is 'debug' due to logger's own level setting
         logger.debug(f"DeepSeek API Response (JSON):\n{json.dumps(response_json, indent=2, ensure_ascii=False)}")
@@ -832,10 +837,16 @@ def translate_text_deepseek(text: str, settings: Dict) -> Optional[str]:
             logger.error(f"DeepSeek API: Unexpected response structure: {response_json}")
             return None
 
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException as e: # This includes HTTPError
         logger.error(f"DeepSeek API Request Error: {e}")
-        if hasattr(e, 'response') and e.response is not None and settings.get('log_level', 'errors') in ['api_calls', 'debug']:
-             logger.info(f"Failed API Response from {DEEPSEEK_API_URL}: Status={e.response.status_code}, Body={e.response.text}")
+        if hasattr(e, 'response') and e.response is not None:
+            if settings.get('log_level', 'errors') in ['api_calls', 'debug']:
+                try:
+                    error_response_json = e.response.json()
+                    error_response_data_log = json.dumps(error_response_json, indent=2, ensure_ascii=False)
+                except ValueError:
+                    error_response_data_log = e.response.text
+                logger.info(f"Failed API Response from {DEEPSEEK_API_URL}: Status={e.response.status_code}, Body:\n{error_response_data_log}")
         return None
     except Exception as e:
         logger.error(f"DeepSeek API Error: {str(e)}")
@@ -910,10 +921,15 @@ def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
         )
 
         if log_level in ['api_calls', 'debug']:
-            logger.info(f"API Response from {gemini_url}: Status={response.status_code}, Body={response.text}")
+            try:
+                response_json_data = response.json()
+                response_data_log = json.dumps(response_json_data, indent=2, ensure_ascii=False)
+            except ValueError:
+                response_data_log = response.text
+            logger.info(f"API Response from {gemini_url.split('?')[0]}: Status={response.status_code}, Body:\n{response_data_log}")
             
         response.raise_for_status()
-        response_json = response.json()
+        response_json = response.json() # Assuming this will succeed if raise_for_status didn't throw
 
         # This debug log will only show if log_level is 'debug'
         logger.debug(f"Gemini API Response (JSON):\n{json.dumps(response_json, indent=2, ensure_ascii=False)}")
@@ -937,15 +953,21 @@ def translate_text_gemini(text: str, settings: Dict) -> Optional[str]:
         logger.error(f"Gemini API response structure error: {response_json}")
         raise Exception("Unexpected structure from Gemini API")
 
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPError as e: # HTTPError is a subclass of RequestException
         logger.error(f"Gemini API HTTP Error: {e}")
-        # Log response body for HTTP errors if log level is api_calls or debug
-        if e.response is not None and settings.get('log_level', 'errors') in ['api_calls', 'debug']:
-            logger.info(f"Failed API Response from {gemini_url}: Status={e.response.status_code}, Body={e.response.text}")
-        # The original error logging for status and body will be covered by logger.error if level is ERROR or lower
         if e.response is not None:
-             logger.error(f"Response status code: {e.response.status_code}") # This will show if log level is ERROR or lower
-             logger.error(f"Response body: {e.response.text}") # This will show if log level is ERROR or lower
+            if settings.get('log_level', 'errors') in ['api_calls', 'debug']:
+                try:
+                    error_response_json = e.response.json()
+                    error_response_data_log = json.dumps(error_response_json, indent=2, ensure_ascii=False)
+                except ValueError:
+                    error_response_data_log = e.response.text
+                logger.info(f"Failed API Response from {gemini_url.split('?')[0]}: Status={e.response.status_code}, Body:\n{error_response_data_log}")
+            # These specific logger.error calls for status/body might become redundant if the above logger.info captures it well,
+            # but keeping them ensures that errors are logged even if 'api_calls' isn't the level.
+            # The general e will be logged by logger.error already.
+            logger.error(f"Response status code: {e.response.status_code}") 
+            logger.error(f"Response body: {e.response.text}") 
         return None
 
     except Exception as e:
