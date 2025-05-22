@@ -204,8 +204,8 @@ def configure_settings(settings: Dict):
                     print("   5 - Gemini 1.5 Pro (gemini-1.5-pro)")
                     print("   6 - Gemini 2.0 Pro Exp (gemini-2.0-pro-exp-02-05)")
                     print("   7 - Gemini 2.0 Flash Thinking Exp (gemini-2.0-flash-thinking-exp-01-21)")
-                    print("   8 - Gemma 7B-IT (gemma-7b-it) - English Optimized")
-                    print("   9 - Gemma 2B-IT (gemma-2b-it) - English Optimized")
+                    print("   8 - Gemma 3N-E4B-IT (gemma-3n-e4b-it) - Latest Gen, Multimodal")
+                    print("   9 - Gemma 3-27B-IT (gemma-3-27b-it) - Latest Gen, Multimodal")
                     model_choice = input("Select Gemini model number: ").strip()
 
                     if model_choice == '1':
@@ -223,9 +223,9 @@ def configure_settings(settings: Dict):
                     elif model_choice == '7':
                         settings['gemini_model'] = 'gemini-2.0-flash-thinking-exp-01-21'
                     elif model_choice == '8':
-                        settings['gemini_model'] = 'gemma-7b-it'
+                        settings['gemini_model'] = 'gemma-3n-e4b-it'
                     elif model_choice == '9':
-                        settings['gemini_model'] = 'gemma-2b-it'
+                        settings['gemini_model'] = 'gemma-3-27b-it'
                     else:
                         print("Invalid model choice.")
                         continue

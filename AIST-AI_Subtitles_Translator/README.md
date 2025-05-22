@@ -32,7 +32,7 @@
 - Configurable translation settings
 - All languages are supported
 
-**Note on Gemma Models:** Gemma models are primarily optimized for English. While they can be prompted for translation, their performance may vary for non-English languages compared to multilingual models like Gemini. The script sends all necessary instructions within the user prompt, compatible with models that do not support separate system prompts.
+**Note on Gemma Models:** Gemma models, such as `gemma-3n-e4b-it` and `gemma-3-27b-it`, are accessible via the Google API and are primarily optimized for English, though they possess multimodal capabilities. While they can be prompted for translation, their performance may vary for non-English languages compared to models specifically trained on a wider range of languages. The script sends all necessary instructions within the user prompt, compatible with models that do not support separate system prompts.
 
 <a name="requirements"></a>
 ## ⚙️ System Requirements
@@ -111,8 +111,8 @@ You can configure the script settings by running it and pressing `1` when prompt
     - `gemini-1.5-pro`
     - `gemini-2.0-pro-exp-02-05`
     - `gemini-2.0-flash-thinking-exp-01-21` (default)
-    - `gemma-7b-it` (English Optimized)
-    - `gemma-2b-it` (English Optimized)
+    - `gemma-3n-e4b-it` (Latest Generation, Multimodal)
+    - `gemma-3-27b-it` (Latest Generation, Multimodal)
 6.  **DeepSeek Model**: Choose a specific DeepSeek model to use for translation. Available models:
     - `deepseek-chat` (default)
     - `deepseek-reasoner`
@@ -132,7 +132,7 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
 - Настраиваемые параметры перевода 
 - Поддержка всех языков, включая клингон и эльфийский
 
-**Примечание о моделях Gemma:** Модели Gemma в первую очередь оптимизированы для английского языка. Хотя их можно использовать для перевода с помощью специальных инструкций в промпте, их производительность для других языков может отличаться от моделей, изначально обученных на многих языках (например, Gemini). Скрипт передает все необходимые инструкции в составе пользовательского промпта, что совместимо с моделями, не поддерживающими отдельный системный промпт.
+**Примечание о моделях Gemma:** Модели Gemma, такие как `gemma-3n-e4b-it` и `gemma-3-27b-it`, доступны через Google API и в первую очередь оптимизированы для английского языка, обладая при этом мультимодальными возможностями. Хотя их можно использовать для перевода с помощью специальных инструкций в промпте, их производительность для других языков может отличаться от моделей, изначально обученных на многих языках. Скрипт передает все необходимые инструкции в составе пользовательского промпта, что совместимо с моделями, не поддерживающими отдельный системный промпт.
 
 <a name="требования"></a>
 ## ⚙️ Требования
@@ -218,8 +218,8 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
     - `gemini-1.5-pro`
     - `gemini-2.0-pro-exp-02-05`
     - `gemini-2.0-flash-thinking-exp-01-21` (по умолчанию)
-    - `gemma-7b-it` (Оптимизирована для Английского)
-    - `gemma-2b-it` (Оптимизирована для Английского)
+    - `gemma-3n-e4b-it` (Новое Поколение, Мультимодальная)
+    - `gemma-3-27b-it` (Новое Поколение, Мультимодальная)
 6.  **Модель DeepSeek**: Выбор конкретной модели DeepSeek для перевода. Доступные модели:
     - `deepseek-chat` (по умолчанию)
     - `deepseek-reasoner`
