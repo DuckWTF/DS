@@ -204,6 +204,8 @@ def configure_settings(settings: Dict):
                     print("   5 - Gemini 1.5 Pro (gemini-1.5-pro)")
                     print("   6 - Gemini 2.0 Pro Exp (gemini-2.0-pro-exp-02-05)")
                     print("   7 - Gemini 2.0 Flash Thinking Exp (gemini-2.0-flash-thinking-exp-01-21)")
+                    print("   8 - Gemma 7B-IT (gemma-7b-it) - Оптимизирована для Английского")
+                    print("   9 - Gemma 2B-IT (gemma-2b-it) - Оптимизирована для Английского")
                     model_choice = input("Выберите номер модели Gemini: ").strip()
 
                     if model_choice == '1':
@@ -220,6 +222,10 @@ def configure_settings(settings: Dict):
                         settings['gemini_model'] = 'gemini-2.0-pro-exp-02-05'
                     elif model_choice == '7':
                         settings['gemini_model'] = 'gemini-2.0-flash-thinking-exp-01-21'
+                    elif model_choice == '8':
+                        settings['gemini_model'] = 'gemma-7b-it'
+                    elif model_choice == '9':
+                        settings['gemini_model'] = 'gemma-2b-it'
                     else:
                         print("Неверный выбор модели.")
                         continue

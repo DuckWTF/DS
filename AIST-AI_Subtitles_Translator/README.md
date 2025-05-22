@@ -27,10 +27,12 @@
 <a name="features"></a>
 ## 🌟 Features
 - Batch processing of SRT and ASS files
-- Context-aware AI translation via Deepseek API or Gemini API
+- Context-aware AI translation via Deepseek AI, Gemini AI, or Gemma models (via Google API)
 - Millisecond-accurate time shifting
 - Configurable translation settings
 - All languages are supported
+
+**Note on Gemma Models:** Gemma models are primarily optimized for English. While they can be prompted for translation, their performance may vary for non-English languages compared to multilingual models like Gemini. The script sends all necessary instructions within the user prompt, compatible with models that do not support separate system prompts.
 
 <a name="requirements"></a>
 ## ⚙️ System Requirements
@@ -89,7 +91,7 @@ To use the translation feature, you need an API key from either Deepseek or Gemi
 ### Gemini API Key
 1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey) and create a project if you haven't already.
 2. In the "API keys" section, create an API key.
-3. Copy the API key.
+3. Copy the API key. This API key is also used for Gemma models.
 4. You can set the `GEMINI_API_KEY` environment variable or enter it when the script prompts you, or configure it in settings.
 
 <a name="settings"></a>
@@ -101,7 +103,7 @@ You can configure the script settings by running it and pressing `1` when prompt
 2.  **Translation language**: Set the target language for translation (e.g., `russian`, `french`, `german`, `none` to disable translation).
 3.  **API provider**: Choose between `gemini` and `deepseek` to select which API to use for translation.
 4.  **[Deepseek/Gemini] API key**: Set or update your API key for the selected provider. You can also set API keys as environment variables `DEEPSEEK_API_KEY` or `GEMINI_API_KEY`.
-5.  **Gemini Model**: Choose a specific Gemini model to use for translation. Available models:
+5.  **Gemini Model**: Choose a specific Gemini or Gemma model to use for translation. Available models:
     - `gemini-2.0-flash`
     - `gemini-2.0-flash-lite-preview-02-05`
     - `gemini-1.5-flash`
@@ -109,6 +111,8 @@ You can configure the script settings by running it and pressing `1` when prompt
     - `gemini-1.5-pro`
     - `gemini-2.0-pro-exp-02-05`
     - `gemini-2.0-flash-thinking-exp-01-21` (default)
+    - `gemma-7b-it` (English Optimized)
+    - `gemma-2b-it` (English Optimized)
 6.  **DeepSeek Model**: Choose a specific DeepSeek model to use for translation. Available models:
     - `deepseek-chat` (default)
     - `deepseek-reasoner`
@@ -123,10 +127,12 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
 <a name="особенности"></a>
 ## 🌟 Особенности
 - Пакетная обработка SRT и ASS субтитров
-- Контекстно-зависимый перевод через Deepseek AI или Gemini AI
+- Контекстно-зависимый перевод через Deepseek AI, Gemini AI или модели Gemma (через Google API)
 - Пакетная синхронизация времени субтитров
 - Настраиваемые параметры перевода 
 - Поддержка всех языков, включая клингон и эльфийский
+
+**Примечание о моделях Gemma:** Модели Gemma в первую очередь оптимизированы для английского языка. Хотя их можно использовать для перевода с помощью специальных инструкций в промпте, их производительность для других языков может отличаться от моделей, изначально обученных на многих языках (например, Gemini). Скрипт передает все необходимые инструкции в составе пользовательского промпта, что совместимо с моделями, не поддерживающими отдельный системный промпт.
 
 <a name="требования"></a>
 ## ⚙️ Требования
@@ -192,7 +198,7 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
 ### Gemini API Ключ
 1. Перейдите на [Google AI Studio](https://makersuite.google.com/app/apikey) и создайте проект, если еще не создавали. **Для доступа к Google AI Studio может потребоваться VPN.**
 2. В разделе "API keys" создайте API ключ.
-3. Скопируйте API ключ.
+3. Скопируйте API ключ. Этот API ключ также используется для моделей Gemma.
 4. Вы можете задать ключ как переменную окружения `GEMINI_API_KEY`, ввести при запросе скрипта или настроить через меню настроек.
 
 <a name="настройки"></a>
@@ -204,7 +210,7 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
 2.  **Язык перевода**: Установка языка перевода (например, `russian`, `french`, `german`, `none` для отключения перевода).
 3.  **Провайдер API**: Выбор между `gemini` и `deepseek` для определения, какое API использовать для перевода.
 4.  **[Deepseek/Gemini] API ключ**: Установка или обновление API ключа для выбранного провайдера. Вы также можете задать API ключи как переменные окружения `DEEPSEEK_API_KEY` или `GEMINI_API_KEY`.
-5.  **Модель Gemini**: Выбор конкретной модели Gemini для перевода. Доступные модели:
+5.  **Модель Gemini**: Выбор конкретной модели Gemini или Gemma для перевода. Доступные модели:
     - `gemini-2.0-flash`
     - `gemini-2.0-flash-lite-preview-02-05`
     - `gemini-1.5-flash`
@@ -212,6 +218,8 @@ Settings are saved in `settings.txt` file in the script folder and will be loade
     - `gemini-1.5-pro`
     - `gemini-2.0-pro-exp-02-05`
     - `gemini-2.0-flash-thinking-exp-01-21` (по умолчанию)
+    - `gemma-7b-it` (Оптимизирована для Английского)
+    - `gemma-2b-it` (Оптимизирована для Английского)
 6.  **Модель DeepSeek**: Выбор конкретной модели DeepSeek для перевода. Доступные модели:
     - `deepseek-chat` (по умолчанию)
     - `deepseek-reasoner`
